@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:music_player/screens/local_songs_list.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -15,6 +16,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int _selectedIndex = 0;
   double? screenHeight;
   double? screenWidth;
+  final audioQuery = FlutterAudioQuery();
+  List<SongInfo> songs = [];
 
   static const IconData globe = IconData(0xf68d);
 
@@ -22,9 +25,18 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void initState() {
     // TODO: implement initState
     player = AudioPlayer();
+    start();
+
+    super.initState();
+  }
+
+  start() async {
+    songs = await audioQuery.getSongs();
+    setState(() {});
     _widgetOptions = <Widget>[
       LocalSongsListScreen(
         player: player,
+        songs: songs,
       ),
       const Center(
         child: Text('Online Music Page',
@@ -35,8 +47,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
             style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
       ),
     ];
-
-    super.initState();
   }
 
   void _onItemTapped(int index) {

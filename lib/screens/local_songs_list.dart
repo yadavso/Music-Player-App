@@ -15,9 +15,11 @@ import '../resources/my_var.dart';
 import '../widgets/silverAppbar_delegate.dart';
 
 class LocalSongsListScreen extends StatefulWidget {
-  const LocalSongsListScreen({Key? key, required this.player})
+  const LocalSongsListScreen(
+      {Key? key, required this.player, required this.songs})
       : super(key: key);
   final AudioPlayer player;
+  final List<SongInfo> songs;
 
   @override
   State<LocalSongsListScreen> createState() => _LocalSongsListScreenState();
@@ -35,7 +37,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
 
   double? screenHeight;
   double? screenWidth;
-  List<SongInfo> songs = [];
+  // List<SongInfo> widgetsongs = [];
   List<ArtistInfo> artists = [];
   List<AlbumInfo> albums = [];
   List<SongInfo> favList = [];
@@ -67,21 +69,25 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
   }
 
   void getMusic() async {
-    songs = await audioQuery.getSongs();
+    // widget.songs = await audioQuery.getSongs();
     artists = await audioQuery.getArtists();
     albums = await audioQuery.getAlbums();
-    log('$songs');
+    log('$widget.songs');
 
     await getDataFromSharedPref();
-    MyVar.selectedSongIndex = MyVar.savedIndex!;
+    MyVar.selectedSongIndex = MyVar.savedIndex;
     setState(() {});
-    widget.player.setSourceDeviceFile(songs[MyVar.savedIndex!].filePath);
+    widget.player.setSourceDeviceFile(widget.songs[MyVar.savedIndex].filePath);
     //log('$songs');
   }
 
-  Future<Uint8List>? metaData(String path) async {
+  Future<Uint8List> metaData(String path) async {
     final metadata = await MetadataRetriever.fromFile(File(path));
+    // if (metadata.albumArt == null) {
+    //   return Uint8List.fromList([]);
+    // } else {
     return metadata.albumArt!;
+    // }
   }
 
   saveData() async {
@@ -93,13 +99,13 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
   }
 
   int getSongIndexFromId(String id) {
-    var idx = songs.indexWhere((element) => element.id == id);
+    var idx = widget.songs.indexWhere((element) => element.id == id);
     return idx;
   }
 
   getDataFromSharedPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    MyVar.savedIndex = prefs.getInt('songIndex');
+    MyVar.savedIndex = prefs.getInt('songIndex') ?? 0;
     setState(() {});
     // log('get data : $savedIndex');
   }
@@ -179,7 +185,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                     favList: favList,
                     playPauseButtonAnimationController:
                         _playPauseButtonAnimationController,
-                    songs: songs,
+                    songs: widget.songs,
                   );
                 }
               })
@@ -215,7 +221,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                     top: screenWidth! * 0.01,
                     bottom: screenWidth! * 0.01,
                     right: screenWidth! * 0.03),
-                child: songs.isNotEmpty
+                child: widget.songs.isNotEmpty
                     ? Stack(children: [
                         Image.asset(
                           'assets/images/cassete.png',
@@ -226,7 +232,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                             child: ClipRRect(
                                 borderRadius:
                                     BorderRadius.circular(screenWidth! * 0.5),
-                                child: thumbnail(songs[MyVar.savedIndex!].id)))
+                                child: thumbnail(
+                                    widget.songs[MyVar.savedIndex].id)))
                       ])
                     : Image.asset(
                         'assets/images/music.png',
@@ -238,8 +245,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
               Container(
                 width: screenWidth! * 0.66,
                 child: Text(
-                  songs.isNotEmpty
-                      ? songs[MyVar.savedIndex!].title
+                  widget.songs.isNotEmpty
+                      ? widget.songs[MyVar.savedIndex].title
                       : 'Loading...',
                   style: TextStyle(fontSize: screenWidth! * 0.045),
                   overflow: TextOverflow.ellipsis,
@@ -249,8 +256,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
               Container(
                 width: screenWidth! * 0.66,
                 child: Text(
-                  songs.isNotEmpty
-                      ? songs[MyVar.savedIndex!].artist
+                  widget.songs.isNotEmpty
+                      ? widget.songs[MyVar.savedIndex].artist
                       : 'Loading...',
                   style: TextStyle(
                       fontSize: screenWidth! * 0.033, color: Colors.grey[700]),
@@ -289,7 +296,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
         itemBuilder: (BuildContext context, index) => InkWell(
               onTap: () {
                 selectedArtistsList.clear();
-                for (var song in songs) {
+                for (var song in widget.songs) {
                   if (artists[index].id == song.artistId) {
                     selectedArtistsList.add(song);
                   }
@@ -365,7 +372,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                         maxLines: 1,
                         style: TextStyle(
                             color: selectedArtistsList[index].id ==
-                                    songs[MyVar.savedIndex!].id
+                                    widget.songs[MyVar.savedIndex].id
                                 ? Colors.purple.shade800
                                 : null),
                       ),
@@ -378,13 +385,13 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                               maxLines: 1,
                               style: TextStyle(
                                   color: selectedArtistsList[index].id ==
-                                          songs[MyVar.savedIndex!].id
+                                          widget.songs[MyVar.savedIndex].id
                                       ? Colors.purple.shade800
                                       : null),
                             )
                           : Text('Unknown Artist | Unknown Album'),
                       trailing: selectedArtistsList[index].id ==
-                              songs[MyVar.savedIndex!].id
+                              widget.songs[MyVar.savedIndex].id
                           ? Icon(
                               Icons.bar_chart,
                               color: Colors.purple.shade800,
@@ -410,7 +417,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
         itemBuilder: (BuildContext context, index) => InkWell(
               onTap: () {
                 selectedAlbumList.clear();
-                for (var song in songs) {
+                for (var song in widget.songs) {
                   if (albums[index].title == song.album) {
                     selectedAlbumList.add(song);
                   }
@@ -527,7 +534,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                         maxLines: 1,
                         style: TextStyle(
                             color: selectedAlbumList[index].id ==
-                                    songs[MyVar.savedIndex!].id
+                                    widget.songs[MyVar.savedIndex].id
                                 ? Colors.purple.shade800
                                 : null),
                       ),
@@ -540,13 +547,13 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                               maxLines: 1,
                               style: TextStyle(
                                   color: selectedAlbumList[index].id ==
-                                          songs[MyVar.savedIndex!].id
+                                          widget.songs[MyVar.savedIndex].id
                                       ? Colors.purple.shade800
                                       : null),
                             )
                           : Text('Unknown Artist | Unknown Album'),
                       trailing: selectedAlbumList[index].id ==
-                              songs[MyVar.savedIndex!].id
+                              widget.songs[MyVar.savedIndex].id
                           ? Icon(
                               Icons.bar_chart,
                               color: Colors.purple.shade800,
@@ -589,7 +596,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                           maxLines: 1,
                           style: TextStyle(
                               color: searchList[index].id ==
-                                      songs[MyVar.savedIndex!].id
+                                      widget.songs[MyVar.savedIndex].id
                                   ? Colors.purple.shade800
                                   : null),
                         ),
@@ -602,21 +609,21 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                                 maxLines: 1,
                                 style: TextStyle(
                                     color: searchList[index].id ==
-                                            songs[MyVar.savedIndex!].id
+                                            widget.songs[MyVar.savedIndex].id
                                         ? Colors.purple.shade800
                                         : null),
                               )
                             : Text('Unknown Artist | Unknown Album'),
-                        trailing:
-                            searchList[index].id == songs[MyVar.savedIndex!].id
-                                ? Icon(
-                                    Icons.bar_chart,
-                                    color: Colors.purple.shade800,
-                                  )
-                                : const Icon(
-                                    Icons.add,
-                                    color: Colors.transparent,
-                                  ),
+                        trailing: searchList[index].id ==
+                                widget.songs[MyVar.savedIndex].id
+                            ? Icon(
+                                Icons.bar_chart,
+                                color: Colors.purple.shade800,
+                              )
+                            : const Icon(
+                                Icons.add,
+                                color: Colors.transparent,
+                              ),
                       ),
                     ),
                   );
@@ -626,39 +633,42 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
               )
         : ListView.builder(
             physics: BouncingScrollPhysics(),
-            itemCount: songs.length,
+            itemCount: widget.songs.length,
             itemBuilder: (BuildContext context, index) {
               return InkWell(
                 onTap: () async {
-                  songsTabOnTapFunction(songs[index].id);
+                  songsTabOnTapFunction(widget.songs[index].id);
                 },
                 child: Padding(
                   padding: EdgeInsets.only(top: screenHeight! * 0.00),
                   child: ListTile(
                     leading: Container(
                         width: screenWidth! * 0.15,
-                        child: thumbnail(songs[index].id)),
+                        child: thumbnail(widget.songs[index].id)),
                     title: Text(
-                      songs[index].title,
+                      widget.songs[index].title,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: TextStyle(
-                          color: songs[index].id == songs[MyVar.savedIndex!].id
+                          color: widget.songs[index].id ==
+                                  widget.songs[MyVar.savedIndex].id
                               ? Colors.purple.shade800
                               : null),
                     ),
-                    subtitle: songs[index].artist != '<unknown>'
+                    subtitle: widget.songs[index].artist != '<unknown>'
                         ? Text(
-                            songs[index].artist + ' | ' + songs[index].album,
+                            widget.songs[index].artist +
+                                ' | ' +
+                                widget.songs[index].album,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(
-                                color: index == MyVar.savedIndex!
+                                color: index == MyVar.savedIndex
                                     ? Colors.purple.shade800
                                     : null),
                           )
                         : Text('Unknown Artist | Unknown Album'),
-                    trailing: index == MyVar.savedIndex!
+                    trailing: index == MyVar.savedIndex
                         ? Icon(
                             Icons.bar_chart,
                             color: Colors.purple.shade800,
@@ -689,9 +699,9 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
   }
 
   Widget thumbnail(String id) {
-    int idx = songs.indexWhere((element) => element.id == id);
+    int idx = widget.songs.indexWhere((element) => element.id == id);
     return FutureBuilder<Uint8List>(
-      future: metaData(songs[idx].filePath),
+      future: metaData(widget.songs[idx].filePath),
       builder: (context, snapshot) {
         return snapshot.hasData
             ? Image.memory(
@@ -836,7 +846,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
       return;
     }
 
-    for (var song in songs) {
+    for (var song in widget.songs) {
       if (song.title!.toLowerCase().contains(text.toLowerCase())) {
         searchList.add(song);
       }
