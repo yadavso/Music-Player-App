@@ -1,6 +1,6 @@
-# music_player
+# Music Player App
 
-A new Flutter project.
+An offline Music Player App using Flutter.
 
 ## Getting Started
 
