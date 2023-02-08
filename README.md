@@ -2,15 +2,13 @@
 
 An offline Music Player App using Flutter.
 
-## Getting Started
+---------------------------------------------------------------------------------------------------------------------------------------
 
-This project is a starting point for a Flutter application.
+# UI Images
 
-A few resources to get you started if this is your first Flutter project:
+![music app1](https://user-images.githubusercontent.com/79310659/217300087-c18e1a70-4140-495b-a1d6-8cd617aff48d.png)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![music app 2](https://user-images.githubusercontent.com/79310659/217300106-7b9957f2-ec1e-4abe-9125-9ed77d3c1062.png)
+
+
