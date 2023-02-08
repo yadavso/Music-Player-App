@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -11,6 +11,7 @@ import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:music_player/resources/my_var.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/get_fav_songs_model.dart';
 import '../models/songs_info_model.dart';
 
 class MusicPlayScreen extends StatefulWidget {
@@ -47,6 +48,8 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
   late int idx;
 
   late SongsInfoModel songsInfoModel;
+  List<String> stringFavList1 = [];
+  List<String> stringFavList2 = [];
 
   @override
   void initState() {
@@ -85,7 +88,7 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
         .indexWhere((element) => element.id == MyVar.selectedSongId);
     if (tempIdx == -1) {
       setState(() {
-        idx = MyVar.savedIndex!;
+        idx = MyVar.savedIndex;
       });
     } else {
       setState(() {
@@ -100,6 +103,22 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
     widget.player.resume();
     setState(() {});
     await metaData();
+    await getFavListFromSharedPref();
+    List<GetFavSongs> temp1 = [];
+    if (stringFavList1.isNotEmpty) {
+      for (var element in stringFavList1) {
+        temp1.add(GetFavSongs.fromJson(json.decode(element)));
+        setState(() {});
+      }
+      // bool check = false;
+      innerLoop:
+      for (var element in temp1) {
+        if (element.id == MyVar.selectedSongId) {
+          favorite = true;
+          break innerLoop;
+        }
+      }
+    }
   }
 
   String formatTime(int seconds) {
@@ -118,19 +137,76 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
     setState(() {});
   }
 
-  saveFavListInSharedPref(List<SongInfo> _favList) async {
+  saveFavListInSharedPref(SongInfo fav) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _favList.forEach((element) {
-      songsInfoModel.title = element.title;
-      songsInfoModel.artistId = element.artistId;
-      songsInfoModel.artist = element.artist;
-      songsInfoModel.albumId = element.albumId;
-      songsInfoModel.album = element.album;
-      songsInfoModel.filePath = element.filePath;
-      setState(() {});
-    });
-    final String temp = SongsInfoModel.encode([songsInfoModel]);
-    log('$temp');
+
+    songsInfoModel.title = fav.title;
+    songsInfoModel.artistId = fav.artistId;
+    songsInfoModel.artist = fav.artist;
+    songsInfoModel.albumId = fav.albumId;
+    songsInfoModel.album = fav.album;
+    songsInfoModel.filePath = fav.filePath;
+    songsInfoModel.id = fav.id;
+    setState(() {});
+    List<GetFavSongs> temp1 = [];
+
+    // stringFavList1.add(jsonEncode(songsInfoModel));
+    if (favorite == true) {
+      if (stringFavList1.isNotEmpty) {
+        stringFavList1.forEach((element) {
+          temp1.add(GetFavSongs.fromJson(json.decode(element)));
+          setState(() {});
+        });
+        bool check = false;
+        innerLoop:
+        for (var element in temp1) {
+          if (element.id == fav.id) {
+            check = true;
+            break innerLoop;
+          }
+        }
+        if (check == false) {
+          stringFavList1.add(jsonEncode(songsInfoModel));
+          setState(() {});
+        }
+      } else {
+        stringFavList1.add(jsonEncode(songsInfoModel));
+      }
+    } else {
+      stringFavList1.forEach((element) {
+        temp1.add(GetFavSongs.fromJson(json.decode(element)));
+        setState(() {});
+      });
+      stringFavList1.clear();
+      for (var element in temp1) {
+        if (element.id != fav.id) {
+          stringFavList1.add(jsonEncode(songsInfoModel));
+        }
+      }
+    }
+
+    prefs.setStringList('favList', stringFavList1);
+    //getFavListFromSharedPref();
+  }
+
+  // removeSongFromFavList(SongInfo song) {
+  //   List<GetFavSongs> temp1 = [];
+  //   stringFavList1.forEach((element) {
+  //     temp1.add(GetFavSongs.fromJson(json.decode(element)));
+  //   });
+  //   for (var element in temp1) {
+  //     if (element.id != song.id) {
+  //
+  //       stringFavList2.add(element);
+  //     }
+  //   }
+  // }
+
+  getFavListFromSharedPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    stringFavList1 = prefs.getStringList('favList') ?? [];
+    setState(() {});
+    //log('${stringFavList1}');
   }
 
   @override
@@ -211,16 +287,14 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
                             ),
                           ),
                           IconButton(
-                            onPressed: () async {
+                            onPressed: () {
                               setState(() {
                                 favorite = !favorite;
                               });
+                              saveFavListInSharedPref(widget.songs[idx]);
                               // favorite
-                              //     ? widget.favList.add(widget.songs[idx])
+                              //     ? saveFavListInSharedPref(widget.songs[idx])
                               //     : widget.favList.remove(widget.songs[idx]);
-                              widget.favList.add(widget.songs[idx]);
-                              setState(() {});
-                              saveFavListInSharedPref(widget.favList);
                             },
                             icon: favorite
                                 ? Icon(Icons.favorite, color: Colors.red[800])

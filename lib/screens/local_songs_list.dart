@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -30,8 +29,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
   late final AnimationController _playPauseButtonAnimationController;
   late final AnimationController _controller;
   final MiniplayerController _miniplayerController = MiniplayerController();
-  final TextEditingController _searchTextController = TextEditingController();
-  FocusNode myFocus = FocusNode();
+  late final TextEditingController _searchTextController;
+  late final FocusNode myFocus;
   late final TabController _tabController;
   final audioQuery = FlutterAudioQuery();
 
@@ -52,6 +51,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
+    _searchTextController = TextEditingController();
+    myFocus = FocusNode();
     _tabController = TabController(length: 3, vsync: this);
     _controller = AnimationController(
       duration: const Duration(milliseconds: 5000),
@@ -72,10 +73,11 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
     // widget.songs = await audioQuery.getSongs();
     artists = await audioQuery.getArtists();
     albums = await audioQuery.getAlbums();
-    log('$widget.songs');
+    //  log('$widget.songs');
 
     await getDataFromSharedPref();
     MyVar.selectedSongIndex = MyVar.savedIndex;
+    MyVar.selectedSongId = widget.songs[MyVar.savedIndex].id;
     setState(() {});
     widget.player.setSourceDeviceFile(widget.songs[MyVar.savedIndex].filePath);
     //log('$songs');
@@ -83,11 +85,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
 
   Future<Uint8List> metaData(String path) async {
     final metadata = await MetadataRetriever.fromFile(File(path));
-    // if (metadata.albumArt == null) {
-    //   return Uint8List.fromList([]);
-    // } else {
+
     return metadata.albumArt!;
-    // }
   }
 
   saveData() async {
@@ -577,6 +576,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
     return myFocus.hasFocus
         ? searchList.isNotEmpty
             ? ListView.builder(
+                padding: EdgeInsets.only(
+                    top: screenHeight! * 0.013, bottom: screenHeight! * 0.08),
                 physics: BouncingScrollPhysics(),
                 itemCount: searchList.length,
                 itemBuilder: (BuildContext context, index) {
@@ -632,6 +633,8 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
                 child: Text('No matching song found '),
               )
         : ListView.builder(
+            padding: EdgeInsets.only(
+                top: screenHeight! * 0.013, bottom: screenHeight! * 0.08),
             physics: BouncingScrollPhysics(),
             itemCount: widget.songs.length,
             itemBuilder: (BuildContext context, index) {
@@ -782,7 +785,11 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => FavPage(favList: favList)));
+                      builder: (context) => FavPage(
+                            favList: favList,
+                            songs: widget.songs,
+                            miniplayerController: _miniplayerController,
+                          )));
             },
             child: Container(
                 height: screenHeight! * 0.11,
