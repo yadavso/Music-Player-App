@@ -40,11 +40,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
       ),
       const Center(
         child: Text('Online Music Page',
-            style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
       ),
       const Center(
-        child: Text('Search Page',
-            style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
+        child: Text('Online Search Page',
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
       ),
     ];
   }

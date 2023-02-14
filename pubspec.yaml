@@ -43,6 +43,12 @@ dependencies:
   flutter_media_metadata: ^1.0.0+1
   miniplayer: ^1.0.1
   shared_preferences: ^2.0.17
+#  awesome_notifications: ^0.7.4+1
+  audio_service: ^0.18.9
+
+
+#  flutter_local_notifications: ^13.0.0
+
 
 
 dev_dependencies:

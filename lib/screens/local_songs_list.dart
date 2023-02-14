@@ -46,6 +46,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
   List<SongInfo> selectedAlbumList = [];
 
   List<SongInfo> selectedArtistsList = [];
+  // late File art;
 
   @override
   void initState() {
@@ -765,20 +766,25 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Container(
-            height: screenHeight! * 0.11,
-            width: screenWidth! * 0.29,
-            decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  colors: [
-                    Color.fromARGB(150, 91, 146, 255),
-                    Color.fromARGB(250, 68, 133, 255),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(screenWidth! * 0.02)),
-            child: insideTopElements(Icons.queue_music, 'Playlists'),
+          InkWell(
+            onTap: () {
+              //  createNotification();
+            },
+            child: Container(
+              height: screenHeight! * 0.11,
+              width: screenWidth! * 0.29,
+              decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      Color.fromARGB(150, 91, 146, 255),
+                      Color.fromARGB(250, 68, 133, 255),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(screenWidth! * 0.02)),
+              child: insideTopElements(Icons.queue_music, 'Playlists'),
+            ),
           ),
           InkWell(
             onTap: () {
@@ -845,6 +851,53 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
       ),
     );
   }
+
+  // Future<void> createNotification() async {
+  //   await AwesomeNotifications().createNotification(
+  //     content: NotificationContent(
+  //         id: 1,
+  //         channelKey: 'basic_channel',
+  //         title: widget.songs[MyVar.selectedSongIndex].title,
+  //         body: widget.songs[MyVar.selectedSongIndex].artist,
+  //         // bigPicture: 'asset://assets/images/music.png',
+  //         autoDismissible: false,
+  //         largeIcon: 'asset://assets/images/music.png',
+  //         category: NotificationCategory.Service,
+  //         //locked: true,
+  //         //  progress: 50,
+  //         displayOnForeground: true,
+  //         notificationLayout: NotificationLayout.MediaPlayer),
+  //     actionButtons: [
+  //       NotificationActionButton(
+  //           key: 'play',
+  //           label: 'ksjdfhg',
+  //           icon: 'asset://assets/icons/forward.png',
+  //           color: Colors.white,
+  //           actionType: ActionType.SilentAction,
+  //           showInCompactView: true,
+  //           enabled: false,
+  //           autoDismissible: true),
+  //       NotificationActionButton(
+  //           key: 'next',
+  //           label: 'ksjdfhg',
+  //           icon: 'asset://assets/icons/forward.png',
+  //           color: Colors.white,
+  //           actionType: ActionType.SilentAction,
+  //           showInCompactView: true,
+  //           enabled: false,
+  //           autoDismissible: true),
+  //       NotificationActionButton(
+  //           key: 'pause',
+  //           label: 'ksjdfhg',
+  //           icon: 'asset://assets/icons/forward.png',
+  //           color: Colors.white,
+  //           actionType: ActionType.SilentAction,
+  //           showInCompactView: true,
+  //           enabled: false,
+  //           autoDismissible: true),
+  //     ],
+  //   );
+  // }
 
   Future<void> onSearchTextChanged(String text) async {
     searchList.clear();

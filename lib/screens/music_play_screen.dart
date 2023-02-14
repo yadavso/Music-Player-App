@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -45,6 +46,7 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
   Duration position = Duration.zero;
   Uint8List? thumbnail;
   bool favorite = false;
+  bool checkOneRepeat = false;
   late int idx;
 
   late SongsInfoModel songsInfoModel;
@@ -73,9 +75,43 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
         position = newPosition;
       });
     });
-    widget.player.onPlayerComplete.listen((complete) {
-      widget.player.stop();
-      MyVar.isPlaying = false;
+    widget.player.onPlayerComplete.listen((complete) async {
+      final prefs = await SharedPreferences.getInstance();
+
+      if (MyVar.repeat == 1) {
+        setState(() {
+          idx = idx;
+        });
+      } else if (MyVar.repeat == 2) {
+        setState(() {
+          checkOneRepeat = !checkOneRepeat;
+        });
+        if (checkOneRepeat == false && MyVar.shuffle == true) {
+          setState(() {
+            idx = Random().nextInt(widget.songs.length);
+          });
+        } else if (MyVar.shuffle == false) {
+          idx = idx + 1;
+          setState(() {});
+        }
+      } else {
+        if (MyVar.shuffle == true) {
+          setState(() {
+            idx = Random().nextInt(widget.songs.length);
+          });
+        } else {
+          setState(() {
+            idx = idx + 1;
+          });
+        }
+      }
+
+      await prefs.setInt('songIndex', idx);
+      MyVar.savedIndex = idx;
+      MyVar.selectedSongIndex = idx;
+      MyVar.selectedSongId = widget.songs[idx].id;
+      setState(() {});
+      playMusic();
     });
 
     // data = player.audioCache.loadedFiles;
@@ -330,9 +366,11 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+                        repeatButton(),
                         backwardButton(),
                         pausePlayButton(),
-                        forwordButton()
+                        forwordButton(),
+                        shuffleButton()
                       ],
                     ),
                   ],
@@ -399,10 +437,15 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
     return IconButton(
       onPressed: () async {
         final prefs = await SharedPreferences.getInstance();
+        if (MyVar.shuffle == true) {
+          idx = Random().nextInt(widget.songs.length);
+          setState(() {});
+        } else {
+          setState(() {
+            idx = idx + 1;
+          });
+        }
 
-        setState(() {
-          idx = idx + 1;
-        });
         await prefs.setInt('songIndex', idx);
         MyVar.savedIndex = idx;
         MyVar.selectedSongIndex = idx;
@@ -422,8 +465,14 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
       onPressed: () async {
         final prefs = await SharedPreferences.getInstance();
 
-        idx = idx - 1;
-        setState(() {});
+        if (MyVar.shuffle == true) {
+          idx = Random().nextInt(widget.songs.length);
+          setState(() {});
+        } else {
+          setState(() {
+            idx = idx - 1;
+          });
+        }
         await prefs.setInt('songIndex', idx);
         MyVar.savedIndex = idx;
         MyVar.selectedSongIndex = idx;
@@ -436,5 +485,44 @@ class _MusicPlayScreenState extends State<MusicPlayScreen>
         color: Colors.white,
       ),
     );
+  }
+
+  Widget shuffleButton() {
+    return IconButton(
+        onPressed: () {
+          setState(() {
+            MyVar.shuffle = !MyVar.shuffle;
+          });
+        },
+        icon: Icon(
+          Icons.shuffle,
+          color: MyVar.shuffle ? Colors.green : Colors.white,
+        ));
+  }
+
+  Widget repeatButton() {
+    IconData icon;
+    if (MyVar.repeat == 1) {
+      icon = Icons.repeat;
+    } else if (MyVar.repeat == 2) {
+      icon = Icons.repeat_one;
+    } else {
+      icon = Icons.repeat;
+    }
+    return IconButton(
+        onPressed: () {
+          setState(() {
+            if (MyVar.repeat == 3) {
+              MyVar.repeat = 0;
+            }
+            MyVar.repeat++;
+          });
+        },
+        icon: Icon(
+          icon,
+          color: MyVar.repeat == 1 || MyVar.repeat == 2
+              ? Colors.green
+              : Colors.white,
+        ));
   }
 }
