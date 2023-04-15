@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
@@ -66,6 +67,15 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
       // MyVar.isPlaying = false;
       setState(() {});
     });
+    // AwesomeNotifications().actionStream.listen((action) {
+    //   if (action.buttonKeyPressed == "open") {
+    //     print("Open button is pressed");
+    //   } else if (action.buttonKeyPressed == "delete") {
+    //     print("Delete button is pressed.");
+    //   } else {
+    //     print(action.payload); //notification was pressed
+    //   }
+    // });
 
     getMusic();
   }
@@ -768,7 +778,7 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
         children: [
           InkWell(
             onTap: () {
-              //  createNotification();
+              createNotification();
             },
             child: Container(
               height: screenHeight! * 0.11,
@@ -852,52 +862,54 @@ class _LocalSongsListScreenState extends State<LocalSongsListScreen>
     );
   }
 
-  // Future<void> createNotification() async {
-  //   await AwesomeNotifications().createNotification(
-  //     content: NotificationContent(
-  //         id: 1,
-  //         channelKey: 'basic_channel',
-  //         title: widget.songs[MyVar.selectedSongIndex].title,
-  //         body: widget.songs[MyVar.selectedSongIndex].artist,
-  //         // bigPicture: 'asset://assets/images/music.png',
-  //         autoDismissible: false,
-  //         largeIcon: 'asset://assets/images/music.png',
-  //         category: NotificationCategory.Service,
-  //         //locked: true,
-  //         //  progress: 50,
-  //         displayOnForeground: true,
-  //         notificationLayout: NotificationLayout.MediaPlayer),
-  //     actionButtons: [
-  //       NotificationActionButton(
-  //           key: 'play',
-  //           label: 'ksjdfhg',
-  //           icon: 'asset://assets/icons/forward.png',
-  //           color: Colors.white,
-  //           actionType: ActionType.SilentAction,
-  //           showInCompactView: true,
-  //           enabled: false,
-  //           autoDismissible: true),
-  //       NotificationActionButton(
-  //           key: 'next',
-  //           label: 'ksjdfhg',
-  //           icon: 'asset://assets/icons/forward.png',
-  //           color: Colors.white,
-  //           actionType: ActionType.SilentAction,
-  //           showInCompactView: true,
-  //           enabled: false,
-  //           autoDismissible: true),
-  //       NotificationActionButton(
-  //           key: 'pause',
-  //           label: 'ksjdfhg',
-  //           icon: 'asset://assets/icons/forward.png',
-  //           color: Colors.white,
-  //           actionType: ActionType.SilentAction,
-  //           showInCompactView: true,
-  //           enabled: false,
-  //           autoDismissible: true),
-  //     ],
-  //   );
-  // }
+  Future<void> createNotification() async {
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+          id: 1,
+          channelKey: 'channel1',
+          title: widget.songs[MyVar.selectedSongIndex].title,
+          body: widget.songs[MyVar.selectedSongIndex].artist,
+          // bigPicture: 'asset://assets/images/music.png',
+          autoDismissible: false,
+          largeIcon: 'asset://assets/images/music.png',
+          // category: NotificationCategory.Service,
+          locked: true,
+          progress: 50,
+          displayOnForeground: true,
+          actionType: ActionType.SilentBackgroundAction,
+          notificationLayout: NotificationLayout.MediaPlayer),
+      actionButtons: [
+        NotificationActionButton(
+            key: 'play',
+            label: '',
+            icon: 'asset://assets/icons/forward.png',
+            color: Colors.black,
+            // actionType: ActionType.SilentAction,
+            showInCompactView: false,
+            // enabled: ,
+            autoDismissible: true),
+        NotificationActionButton(
+            key: 'next',
+            label: '',
+            icon: 'asset://assets/icons/forward.png',
+            color: Colors.black,
+            // actionType: ActionType.SilentAction,
+            showInCompactView: false,
+            isDangerousOption: true,
+            enabled: false,
+            autoDismissible: true),
+        NotificationActionButton(
+            key: 'pause',
+            label: '',
+            icon: 'asset://assets/icons/forward.png',
+            color: Colors.black,
+            actionType: ActionType.SilentBackgroundAction,
+            showInCompactView: false,
+            enabled: false,
+            autoDismissible: true),
+      ],
+    );
+  }
 
   Future<void> onSearchTextChanged(String text) async {
     searchList.clear();
